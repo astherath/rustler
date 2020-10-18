@@ -1,8 +1,8 @@
 mod cli;
+use cli::cli::CommandLineArgs;
 mod parser;
 
 fn main() {
-    cli::cli::get_matches();
-    // let filename = String::from("example.txt");
-    // parser::parser::read_file_data(filename);
+    let cli_args = CommandLineArgs::new();
+    parser::parser::read_file_data(cli_args.filename);
 }
