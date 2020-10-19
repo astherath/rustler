@@ -17,7 +17,7 @@ pub mod parser {
     // ///
     // ///
     pub fn read_file_data(filename: String) {
-        let file_op = FileParser::new(&filename);
+        let file_op = FileParser::new(filename);
         // file_op.print_all_lines()
         let resp = file_op.unpack_lines_to_code_patch();
         let mut i = 1;
@@ -27,13 +27,13 @@ pub mod parser {
         }
     }
 
-    struct FileParser<'a> {
-        filename: &'a str,
+    struct FileParser {
+        filename: String,
         lines: Vec<String>,
         current_line: u32,
     }
 
-    impl<'a> FileParser<'a> {
+    impl FileParser {
         /// Instantiates FileParser for a given filename
         ///
         /// # Arguments
@@ -43,8 +43,8 @@ pub mod parser {
         /// # Notes
         ///
         /// The filename is NOT checked to exist at this point. However the file will be checked for completion on read so no double check needed.
-        fn new(filename: &'a str) -> FileParser<'a> {
-            let lines = FileParser::get_lines_from_file(filename);
+        fn new(filename: String) -> FileParser {
+            let lines = FileParser::get_lines_from_file(&filename);
             let response = FileParser {
                 filename,
                 lines,
@@ -62,7 +62,7 @@ pub mod parser {
         /// # Returns
         ///
         /// `io::Lines` iterator from the file
-        fn get_lines_from_file(filename: &str) -> Vec<String> {
+        fn get_lines_from_file(filename: &String) -> Vec<String> {
             let path = Path::new(filename);
             let file = match File::open(&path) {
                 Err(why) => panic!(
