@@ -4,14 +4,14 @@ pub mod parser {
     use std::io::{self, BufRead};
     use std::path::Path;
 
-    pub fn read_file_data(filename: String) {
-        let mut file_op = FileOperatorUtil::new(filename);
-        file_op.print_all_lines()
-    }
-
     fn setup_ansi_colors() {
         #[cfg(target_os = "windows")]
         ansi_term::enable_ansi_support();
+    }
+
+    pub fn read_file_data(filename: String) {
+        let mut file_op = FileParser::new(filename);
+        file_op.print_all_lines()
     }
 
     fn check_line_todo(line: &String) -> bool {
@@ -32,34 +32,31 @@ pub mod parser {
         lines
     }
 
-    struct FileOperatorUtil {
+    struct FileParser {
         filename: String,
         current_line: u32,
-        special_line_count: u16,
-        special_line_numbers: Vec<u32>,
     }
 
-    impl FileOperatorUtil {
-        fn new(filename: String) -> FileOperatorUtil {
-            let response = FileOperatorUtil {
+    impl FileParser {
+        /// Instantiates FileParser for a given filename
+        ///
+        /// # Arguments
+        ///
+        /// * `filename` - A string with the filename of the file to be parsed
+        ///
+        /// # Notes
+        ///
+        /// The filename is NOT checked to exist at this point. However the file will be checked for completion on read so no double check needed.
+        fn new(filename: String) -> FileParser {
+            let response = FileParser {
                 filename,
                 current_line: 1,
-                special_line_count: 0,
-                special_line_numbers: Vec::new(),
             };
             response
         }
 
         fn inc_line_number(&mut self) {
             self.current_line += 1
-        }
-
-        fn inc_special_line_count(&mut self) {
-            self.special_line_count += 1
-        }
-
-        fn add_special_line(&mut self) {
-            self.special_line_numbers.push(self.current_line);
         }
 
         fn process_special_line(&mut self, line: &String) {
