@@ -1,62 +1,96 @@
 pub mod lines {
     use std::cmp;
+    use std::convert::TryInto;
+
+    pub struct CodeLine {
+        number: u32,
+        content: String,
+        is_special: bool,
+    }
+
+    impl CodeLine {
+        fn new(content: String, number: u32, is_special: bool) -> CodeLine {
+            CodeLine {
+                number,
+                content,
+                is_special,
+            }
+        }
+    }
 
     pub struct CodePatch {
-        pub line: String,
+        pub lines: Vec<CodeLine>,
     }
 
     impl CodePatch {
-        pub fn new(line: String) -> CodePatch {
-            CodePatch { line }
+        pub fn new(lines: Vec<CodeLine>) -> CodePatch {
+            CodePatch { lines }
         }
 
         fn check_line_special(line: &String) -> bool {
             line.to_lowercase().contains("todo")
         }
 
-        // fn print_all_todos(&self) {}
-
         /// Reads the file line-by-line into a context-driven `lines::CodePatch` struct
-        pub fn unpack_lines_to_code_patch_vec(
-            lines: Vec<String>,
-            context: usize,
-        ) -> Vec<CodePatch> {
+        ///
+        /// # Arguments
+        ///
+        /// * `lines` - A String vector with all of the non-empty lines from the file
+        ///
+        /// * `context` - The amount of context lines surrounding the special lines
+        ///
+        /// # Returns
+        ///
+        /// * `Vec<CodePatch>` - A vec containing all of the context-aware special lines
+        ///
+        /// # Notes
+        ///
+        /// If `context` passed in is > `lines.len()` then it will count context until EOF.
+        pub fn unpack_lines(lines: Vec<String>, context: usize) -> Vec<CodePatch> {
+            // code_patch vector to be returned
             let mut code_patch_vec = Vec::new();
-            let mut i = 0;
+
+            // loop vars
             let lines_len = lines.len();
+            let mut i = 0;
+
             while i < lines_len {
                 if CodePatch::check_line_special(&lines[i]) {
-                    let back_range = i.checked_sub(context).unwrap_or(0);
-                    let mut full_context = String::new();
+                    // re-cyclable vec to hold the CodeLines for a single CodePatch
+                    let mut code_lines_vec = Vec::new();
 
                     // add context # of lines behind
+                    let back_range = i.checked_sub(context).unwrap_or(0);
                     for j in back_range..i {
-                        full_context.push_str(&lines[j].trim());
-                        full_context.push_str("\n");
+                        code_lines_vec.push(CodeLine::new(
+                            lines[j].trim().to_string(),
+                            j.try_into().unwrap(),
+                            false,
+                        ));
                     }
 
                     // add current line
-                    full_context.push_str(&lines[i].trim());
-                    full_context.push_str("\n");
+                    code_lines_vec.push(CodeLine::new(
+                        lines[i].trim().to_string(),
+                        i.try_into().unwrap(),
+                        true,
+                    ));
 
                     // add context # of line ahead
-                    let front_range = cmp::min(lines_len, i + context) + 1;
+                    let front_range = cmp::min(lines_len, i + context + 1);
                     for j in (i + 1)..front_range {
-                        full_context.push_str(&lines[j].trim());
-                        full_context.push_str("\n");
+                        code_lines_vec.push(CodeLine::new(
+                            lines[j].trim().to_string(),
+                            j.try_into().unwrap(),
+                            false,
+                        ));
                     }
-                    println!("{}------------------------------", &full_context);
-                    // XXX: debug
+
+                    code_patch_vec.push(CodePatch::new(code_lines_vec));
                 }
                 i += 1;
             }
             code_patch_vec
-        }
-
-        pub fn print_if_special(&self) {
-            if CodePatch::check_line_special(&self.line) {
-                println!("{}", &self.line);
-            }
         }
     }
 }

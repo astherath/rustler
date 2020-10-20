@@ -1,6 +1,5 @@
 pub mod parser {
     use ansi_term::{self, Colour};
-    use lines::lines::CodePatch;
     use std::fs::File;
     use std::io::{self, BufRead};
     use std::path::Path;
@@ -11,14 +10,10 @@ pub mod parser {
         ansi_term::enable_ansi_support();
     }
 
-    // /// Top-level function to mask the usage of the FileParser for a simple interface. Returns
-    pub fn read_file_data(filename: String) {
+    /// Top-level function to mask the usage of the FileParser for a simple interface
+    pub fn read_file_data(filename: String) -> Vec<String> {
         let file_op = FileParser::new(filename);
-        let code_patch_vec = CodePatch::unpack_lines_to_code_patch_vec(file_op.lines, 2);
-
-        for code_patch in code_patch_vec {
-            code_patch.print_if_special();
-        }
+        file_op.lines
     }
 
     struct FileParser {

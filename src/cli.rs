@@ -5,6 +5,7 @@ pub mod cli {
     pub struct CommandLineArgs {
         pub filename: String,
         pub config_filename: String,
+        pub context: usize,
     }
 
     impl CommandLineArgs {
@@ -28,7 +29,11 @@ pub mod cli {
                     Arg::with_name("filename")
                         .help("Sets the input file to rustle")
                         .required(true)
-                        .index(1),
+                )
+                .arg(
+                    Arg::with_name("context")
+                        .help("Tells rustler how many files of surrounding context to return for special lines")
+                        .required(true)
                 )
                 // .arg(
                 // Arg::with_name("v")
@@ -46,9 +51,13 @@ pub mod cli {
                 .unwrap_or("default.conf")
                 .to_string();
 
+            // parse context arg
+            let context: usize = matches.value_of("context").unwrap_or("0").parse().unwrap();
+
             let response = CommandLineArgs {
                 filename,
                 config_filename,
+                context,
             };
             response
         }
