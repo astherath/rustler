@@ -6,8 +6,14 @@ use printer::printer::ConsolePrinter;
 mod parser;
 use ansi_term::{self, Colour};
 
+fn setup_ansi_colors() {
+    #[cfg(target_os = "windows")]
+    ansi_term::enable_ansi_support();
+}
+
 fn main() {
-    let _enabled = ansi_term::enable_ansi_support();
+    setup_ansi_colors();
+
     let cli_args = CommandLineArgs::new();
     let file_lines = parser::parser::read_file_data(cli_args.filename);
     let code_patch_vec = CodePatch::unpack_lines(file_lines, cli_args.context);

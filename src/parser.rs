@@ -11,7 +11,6 @@ pub mod parser {
     }
 
     struct FileParser {
-        filename: String,
         lines: Vec<String>,
     }
 
@@ -28,7 +27,7 @@ pub mod parser {
         /// However the file will be checked for completion on read so no double check needed.
         fn new(filename: String) -> FileParser {
             let lines = FileParser::get_lines_from_file(&filename);
-            FileParser { filename, lines }
+            FileParser { lines }
         }
 
         /// Reads and returns an iterator with the line data for the given filename
