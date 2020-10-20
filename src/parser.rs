@@ -1,14 +1,8 @@
 pub mod parser {
-    use ansi_term::{self, Colour};
+    use ansi_term::Colour;
     use std::fs::File;
     use std::io::{self, BufRead};
     use std::path::Path;
-
-    // TODO: fix this to be called eventually somewhere
-    fn _setup_ansi_colors() {
-        #[cfg(target_os = "windows")]
-        ansi_term::enable_ansi_support();
-    }
 
     /// Top-level function to mask the usage of the FileParser for a simple interface
     pub fn read_file_data(filename: String) -> Vec<String> {

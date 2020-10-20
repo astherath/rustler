@@ -3,9 +3,9 @@ pub mod lines {
     use std::convert::TryInto;
 
     pub struct CodeLine {
-        number: u32,
-        content: String,
-        is_special: bool,
+        pub number: u32,
+        pub content: String,
+        pub is_special: bool,
     }
 
     impl CodeLine {

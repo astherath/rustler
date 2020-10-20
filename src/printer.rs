@@ -1,45 +1,47 @@
 pub mod printer {
+    use ansi_term::Colour;
+    use lines::lines::{CodeLine, CodePatch};
 
-    // fn print_special_line(&self, line: &String) {
-    // println!("{}\t{}", self.current_line, Colour::Purple.paint(line))
-    // }
+    fn print_separator() {
+        let separator = {
+            let mut _str = String::new();
+            let sep_char = '-';
+            for _ in 0..80 {
+                _str.push(sep_char);
+            }
+            _str
+        };
+        println!("{}", separator);
+    }
 
-    // fn print_all_lines(&mut self) {
-    // let lines = get_lines_from_file(&self.filename);
+    pub struct ConsolePrinter {
+        special_colour: Colour,
+    }
 
-    // for line in lines {
-    // if let Ok(txt) = line {
-    // if check_line_todo(&txt) {
-    // self.process_special_line(&txt)
-    // } else {
-    // }
-    // self.inc_line_number();
-    // }
-    // }
+    impl ConsolePrinter {
+        pub fn new(special_colour: Colour) -> ConsolePrinter {
+            ConsolePrinter { special_colour }
+        }
 
-    // // print post-process file data
-    // self.print_file_data()
-    // }
+        pub fn print(&self, code_patches: Vec<CodePatch>) {
+            for patch in code_patches {
+                print_separator();
+                for line in patch.lines {
+                    self.print_line(line);
+                }
+            }
+            print_separator();
+        }
 
-    // fn print_file_data(&self) {
-    // println!(
-    // "\"{}\" had {} TODO's at lines: {}",
-    // self.filename,
-    // self.special_line_count,
-    // self.line_data_to_string()
-    // );
-    // }
-
-    // fn line_data_to_string(&self) -> String {
-    // let mut line_str = String::from("[");
-    // for num in &self.special_line_numbers {
-    // line_str.push_str(&num.to_string());
-    // line_str.push_str(", ");
-    // }
-    // for _ in 0..2 {
-    // line_str.pop();
-    // }
-    // line_str.push_str("]");
-    // line_str
-    // }
+        fn print_line(&self, line: CodeLine) {
+            let printed_string = {
+                if line.is_special {
+                    self.special_colour.paint(&line.content).to_string()
+                } else {
+                    line.content
+                }
+            };
+            println!("{}\t{}", &line.number, printed_string);
+        }
+    }
 }

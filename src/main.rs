@@ -1,10 +1,17 @@
 mod cli;
 use cli::cli::CommandLineArgs;
 use lines::lines::CodePatch;
+mod printer;
+use printer::printer::ConsolePrinter;
 mod parser;
+use ansi_term::{self, Colour};
 
 fn main() {
+    let _enabled = ansi_term::enable_ansi_support();
     let cli_args = CommandLineArgs::new();
     let file_lines = parser::parser::read_file_data(cli_args.filename);
-    let _code_patch_vec = CodePatch::unpack_lines(file_lines, cli_args.context);
+    let code_patch_vec = CodePatch::unpack_lines(file_lines, cli_args.context);
+    let special_colour = Colour::Purple;
+    let printer = ConsolePrinter::new(special_colour);
+    printer.print(code_patch_vec);
 }
