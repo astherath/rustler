@@ -10,6 +10,8 @@ pub mod cli {
         pub filename: String,
         pub context: usize,
         pub display_type: CodePatchType,
+        pub output_filename: Option<String>,
+        pub output_file_flag: bool,
     }
 
     fn make_error_msg(message: &str, usage: &str) -> String {
@@ -48,6 +50,15 @@ pub mod cli {
                     .required(false)
                     .possible_values(&["todo", "fixme", "note", "xxx", "all"])
                 )
+                // Handles setting the output filename (if one given)
+                .arg(
+                    Arg::with_name("out")
+                    .help("If set, a Markdown version of the special lines will be written to this file")
+                    .required(false)
+                    .long("output-filename")
+                    .require_equals(true)
+                    .takes_value(true)
+                )
                 .get_matches();
 
             // check that filename is valid and exists
@@ -69,12 +80,29 @@ pub mod cli {
             let display_type_arg = matches.value_of("type").unwrap_or("all").to_string();
             let display_type = CodePatchType::get_display_type(&display_type_arg);
 
+            // sets output filename if one given
+            let output_file_flag;
+            let output_filename = {
+                match matches.value_of("out") {
+                    Some(file_str) => {
+                        output_file_flag = true;
+                        Some(file_str.to_string())
+                    }
+                    None => {
+                        output_file_flag = false;
+                        None
+                    }
+                }
+            };
+
             // context needs to be unwrapped from the cli then atoi'd into a usize
             let context: usize = matches.value_of("context").unwrap_or("0").parse().unwrap();
             CommandLineArgs {
                 filename,
                 context,
                 display_type,
+                output_filename,
+                output_file_flag,
             }
         }
     }
