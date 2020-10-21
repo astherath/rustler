@@ -2,6 +2,77 @@ pub mod lines {
     use std::cmp;
     use std::convert::TryInto;
 
+    #[derive(PartialEq)]
+    pub enum CodePatchType {
+        Todo,
+        Fixme,
+        Note,
+        XXX,
+        Other,
+    }
+
+    impl CodePatchType {
+        /// Factory method in-place of a constructor for creating CodePatchTypes
+        ///
+        /// # Arguments
+        ///
+        /// * `line_str` - A borrowed String with the line contents
+        ///
+        /// # Returns
+        ///
+        /// A CodePatchType instance
+        ///
+        /// # Note
+        ///
+        /// This function should only be called if the line has been proven to be "special" already.
+        /// If not, it will silently return a `CodePatchType::Other` which may have unintended effects.
+        fn get_special_line_type(line_str: &String) -> CodePatchType {
+            let lower_line = line_str.to_lowercase();
+            if lower_line.contains("todo") {
+                CodePatchType::Todo
+            } else if lower_line.contains("fixme") {
+                CodePatchType::Fixme
+            } else if lower_line.contains("note") {
+                CodePatchType::Note
+            } else if lower_line.contains("xxx") {
+                CodePatchType::XXX
+            } else {
+                CodePatchType::Other
+            }
+        }
+
+        /// Factory method in-place of a constructor for creating CodePatchType instances for display args
+        ///
+        /// # Arguments
+        ///
+        /// * `type_opt` - A borrowed String with the CLI arg passed in for wanted type
+        ///
+        /// # Returns
+        ///
+        /// A CodePatchType instance
+        ///
+        /// # Note
+        ///
+        /// If no match is found, will return `CodePatchType::All`.
+        pub fn get_display_type(type_opt: &String) -> CodePatchType {
+            if type_opt == "todo" {
+                CodePatchType::Todo
+            } else if type_opt == "fixme" {
+                CodePatchType::Fixme
+            } else if type_opt == "note" {
+                CodePatchType::Note
+            } else if type_opt == "xxx" {
+                CodePatchType::XXX
+            } else {
+                CodePatchType::Other
+            }
+        }
+
+        fn check_line_special(line: &String) -> bool {
+            CodePatchType::get_special_line_type(line) != CodePatchType::Other
+        }
+    }
+
     pub struct CodeLine {
         pub number: u32,
         pub content: String,
@@ -20,15 +91,12 @@ pub mod lines {
 
     pub struct CodePatch {
         pub lines: Vec<CodeLine>,
+        pub patch_type: CodePatchType,
     }
 
     impl CodePatch {
-        pub fn new(lines: Vec<CodeLine>) -> CodePatch {
-            CodePatch { lines }
-        }
-
-        fn check_line_special(line: &String) -> bool {
-            line.to_lowercase().contains("todo")
+        pub fn new(lines: Vec<CodeLine>, patch_type: CodePatchType) -> CodePatch {
+            CodePatch { lines, patch_type }
         }
 
         /// Reads the file line-by-line into a context-driven `lines::CodePatch` struct
@@ -55,7 +123,7 @@ pub mod lines {
             let mut i = 0;
 
             while i < lines_len {
-                if CodePatch::check_line_special(&lines[i]) {
+                if CodePatchType::check_line_special(&lines[i]) {
                     // re-cyclable vec to hold the CodeLines for a single CodePatch
                     let mut code_lines_vec = Vec::new();
 
@@ -86,7 +154,10 @@ pub mod lines {
                         ));
                     }
 
-                    code_patch_vec.push(CodePatch::new(code_lines_vec));
+                    // get actual type of special line
+                    let patch_type = CodePatchType::get_special_line_type(&lines[i]);
+
+                    code_patch_vec.push(CodePatch::new(code_lines_vec, patch_type));
                 }
                 i += 1;
             }

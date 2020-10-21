@@ -19,5 +19,5 @@ fn main() {
     let code_patch_vec = CodePatch::unpack_lines(file_lines, cli_args.context);
     let special_colour = Colour::Purple;
     let printer = ConsolePrinter::new(special_colour);
-    printer.print(code_patch_vec);
+    printer.print_all_lines(code_patch_vec);
 }

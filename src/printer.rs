@@ -23,9 +23,13 @@ pub mod printer {
             ConsolePrinter { special_colour }
         }
 
-        pub fn print(&self, code_patches: Vec<CodePatch>) {
+        // pub fn print_all_lines(&self, code_patches: Vec<CodePatch>, display_type: CodePatchType) {
+        pub fn print_all_lines(&self, code_patches: Vec<CodePatch>) {
             for patch in code_patches {
-                print_separator();
+                // if patch.display_type != display_type {
+                // continue;
+                // }
+                // print_separator();
                 for line in patch.lines {
                     self.print_line(line);
                 }

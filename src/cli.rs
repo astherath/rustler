@@ -3,11 +3,13 @@ pub mod cli {
     extern crate clap;
     use ansi_term::Colour;
     use clap::{App, Arg};
+    use lines::lines::CodePatchType;
     use std::{self, path::Path};
 
     pub struct CommandLineArgs {
         pub filename: String,
         pub context: usize,
+        pub display_type: CodePatchType,
     }
 
     fn make_error_msg(message: &str, usage: &str) -> String {
@@ -27,15 +29,24 @@ pub mod cli {
             let matches = App::new("rustler")
                 .version("1.0")
                 .about("Rustles files for TODO and FIXME comments")
+                // Required filename arg that eventually gets checked for existence
                 .arg(
                     Arg::with_name("filename")
                     .help("Sets the input file to rustle")
                     .required(true)
                 )
+                // Sets context lines opt
                 .arg(
                     Arg::with_name("context")
                     .help("Tells rustler how many files of surrounding context to return for special lines")
                     .required(true)
+                )
+                // Sets the wanted type of display returned
+                .arg(
+                    Arg::with_name("type")
+                    .help("Selects what type of special lines get displayed [default: all]")
+                    .required(false)
+                    .possible_values(&["todo", "fixme", "note", "xxx", "all"])
                 )
                 .get_matches();
 
@@ -53,9 +64,18 @@ pub mod cli {
                 };
                 err.exit();
             }
+
+            // gets the type of the display wanted
+            let display_type_arg = matches.value_of("type").unwrap_or("all").to_string();
+            let display_type = CodePatchType::get_display_type(&display_type_arg);
+
             // context needs to be unwrapped from the cli then atoi'd into a usize
             let context: usize = matches.value_of("context").unwrap_or("0").parse().unwrap();
-            CommandLineArgs { filename, context }
+            CommandLineArgs {
+                filename,
+                context,
+                display_type,
+            }
         }
     }
 }
