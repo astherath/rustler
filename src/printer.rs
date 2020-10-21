@@ -1,6 +1,6 @@
 pub mod printer {
     use ansi_term::Colour;
-    use lines::lines::{CodeLine, CodePatch};
+    use lines::lines::{CodeLine, CodePatch, CodePatchType};
 
     fn print_separator() {
         let separator = {
@@ -23,13 +23,16 @@ pub mod printer {
             ConsolePrinter { special_colour }
         }
 
-        // pub fn print_all_lines(&self, code_patches: Vec<CodePatch>, display_type: CodePatchType) {
-        pub fn print_all_lines(&self, code_patches: Vec<CodePatch>) {
+        pub fn print_all_lines(&self, code_patches: Vec<CodePatch>, display_type: CodePatchType) {
+            let display_all = display_type == CodePatchType::Other;
+
             for patch in code_patches {
-                // if patch.display_type != display_type {
-                // continue;
-                // }
-                // print_separator();
+                if !display_all {
+                    if patch.patch_type != display_type {
+                        continue;
+                    }
+                }
+                print_separator();
                 for line in patch.lines {
                     self.print_line(line);
                 }
