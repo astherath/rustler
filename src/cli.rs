@@ -55,7 +55,7 @@ pub mod cli {
                     Arg::with_name("out")
                     .help("If set, a Markdown version of the special lines will be written to this file")
                     .required(false)
-                    .long("output-filename")
+                    .long("output-file")
                     .require_equals(true)
                     .takes_value(true)
                 )

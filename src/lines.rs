@@ -2,7 +2,7 @@ pub mod lines {
     use std::cmp;
     use std::convert::TryInto;
 
-    #[derive(PartialEq)]
+    #[derive(PartialEq, Clone)]
     pub enum CodePatchType {
         Todo,
         Fixme,

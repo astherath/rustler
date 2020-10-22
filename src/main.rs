@@ -2,8 +2,9 @@ mod cli;
 use lines::lines::CodePatch;
 mod parser;
 mod printer;
-mod writer;
+mod writers;
 use ansi_term::{self, Colour};
+use writers::file_writer;
 
 fn setup_ansi_colors() {
     #[cfg(target_os = "windows")]
@@ -32,6 +33,6 @@ fn main() {
     // file output operations handled by the writer methods IF the output flag is set and valid
     if cli_args.output_file_flag {
         let output_filename = cli_args.output_filename.unwrap();
-        writer::writer::write_todos_to_file(&code_patch_vec, &output_filename);
+        file_writer::export_to_markdown(code_patch_vec, &output_filename);
     }
 }
