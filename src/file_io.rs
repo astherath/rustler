@@ -1,5 +1,5 @@
+use super::common_structs::lines::{CodePatch, CodePatchType};
 use super::markdown_fmt;
-use lines::lines::{CodePatch, CodePatchType};
 use std::fs::File;
 use std::io::prelude::*;
 

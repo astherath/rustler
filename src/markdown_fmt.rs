@@ -1,5 +1,5 @@
+use super::common_structs::lines::CodePatchType;
 use super::file_io::OutputBlock;
-use lines::lines::CodePatchType;
 
 pub fn get_header_str_for_block_type(block_type: &CodePatchType) -> String {
     match block_type {

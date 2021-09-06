@@ -1,11 +1,14 @@
 mod cli;
-use lines::lines::CodePatch;
+mod common_structs;
+mod file_io;
+mod markdown_fmt;
 mod parser;
 mod printer;
-mod writers;
+
 use ansi_term::{self, Colour};
-use printer::printer::ConsolePrinter;
-use writers::file_io;
+
+use common_structs::lines::CodePatch;
+use printer::ConsolePrinter;
 
 fn setup_ansi_colors() {
     #[cfg(target_os = "windows")]
@@ -18,10 +21,10 @@ fn main() {
 
     // the `cli_args` struct returned here has all of the pre-validated
     // CLI args, opts, inputs, etc.
-    let cli_args = cli::cli::CommandLineArgs::new();
+    let cli_args = cli::CommandLineArgs::new();
 
     // `file_lines` a vec of all of the non-empty lines (Strings) in the file
-    let file_lines = parser::parser::read_file_data(cli_args.filename);
+    let file_lines = parser::read_file_data(cli_args.filename);
 
     // from `file_lines` we make the vec of context-aware "code patches" here
     let code_patch_vec = CodePatch::unpack_lines(file_lines, cli_args.context);
