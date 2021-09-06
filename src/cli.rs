@@ -11,7 +11,7 @@ pub mod cli {
         pub context: usize,
         pub display_type: CodePatchType,
         pub output_filename: Option<String>,
-        pub output_file_flag: bool,
+        pub markdown_output_flag: bool,
     }
 
     fn make_error_msg(message: &str, usage: &str) -> String {
@@ -81,15 +81,15 @@ pub mod cli {
             let display_type = CodePatchType::get_display_type(&display_type_arg);
 
             // sets output filename if one given
-            let output_file_flag;
+            let markdown_output_flag;
             let output_filename = {
                 match matches.value_of("out") {
                     Some(file_str) => {
-                        output_file_flag = true;
+                        markdown_output_flag = true;
                         Some(file_str.to_string())
                     }
                     None => {
-                        output_file_flag = false;
+                        markdown_output_flag = false;
                         None
                     }
                 }
@@ -102,7 +102,7 @@ pub mod cli {
                 context,
                 display_type,
                 output_filename,
-                output_file_flag,
+                markdown_output_flag,
             }
         }
     }

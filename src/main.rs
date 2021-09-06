@@ -4,7 +4,8 @@ mod parser;
 mod printer;
 mod writers;
 use ansi_term::{self, Colour};
-use writers::file_writer;
+use printer::printer::ConsolePrinter;
+use writers::file_io;
 
 fn setup_ansi_colors() {
     #[cfg(target_os = "windows")]
@@ -27,12 +28,12 @@ fn main() {
 
     // creating printer and consuming it to display terminal output
     let special_colour = Colour::Purple;
-    let printer = printer::printer::ConsolePrinter::new(special_colour);
+    let printer = ConsolePrinter::new(special_colour);
     printer.print_all_lines(&code_patch_vec, cli_args.display_type);
 
     // file output operations handled by the writer methods IF the output flag is set and valid
-    if cli_args.output_file_flag {
+    if cli_args.markdown_output_flag {
         let output_filename = cli_args.output_filename.unwrap();
-        file_writer::export_to_markdown(code_patch_vec, &output_filename);
+        file_io::export_to_markdown(code_patch_vec, &output_filename);
     }
 }
