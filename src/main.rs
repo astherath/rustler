@@ -1,7 +1,8 @@
 mod cli;
 mod common_structs;
 mod file_io;
-mod markdown_fmt;
+mod markdown;
+mod output_formatter;
 mod parser;
 mod printer;
 

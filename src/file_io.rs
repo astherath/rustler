@@ -1,5 +1,5 @@
 use super::common_structs::{CommentType, MarkedSection};
-use super::markdown_fmt;
+use super::output_formatter;
 use std::fs::File;
 use std::io::prelude::*;
 
@@ -73,9 +73,9 @@ impl OutputBlock {
         )
     }
 
-    // Calls the markdown_fmt module to get final formatted Markdown string to write to file
+    // Calls the output_formatter module to get final formatted Markdown string to write to file
     fn get_markdown_output_str(output_blocks: Vec<OutputBlock>) -> String {
-        // TODO:    this function can eventually be re-used if the markdown_fmt methods are swapped out
+        // TODO:    this function can eventually be re-used if the output_formatter methods are swapped out
         //          (i.e. the block handling is the same regardless)
 
         let mut output_str = String::new();
@@ -85,12 +85,12 @@ impl OutputBlock {
         // also pushes a new the header if needed (for new block_type)
         for block in output_blocks {
             if last_block_type != block.block_type {
-                let header_str = markdown_fmt::get_header_str_for_block_type(&block.block_type);
+                let header_str = output_formatter::get_header_str_for_block_type(&block.block_type);
                 output_str.push_str(&header_str);
                 last_block_type = block.block_type.clone();
             }
 
-            output_str.push_str(&markdown_fmt::get_output_str_for_block(block));
+            output_str.push_str(&output_formatter::get_output_str_for_block(block));
         }
         output_str
     }
