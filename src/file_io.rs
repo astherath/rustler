@@ -1,22 +1,22 @@
-use super::common_structs::lines::{CodePatch, CommentType};
+use super::common_structs::{CommentType, MarkedSection};
 use super::markdown_fmt;
 use std::fs::File;
 use std::io::prelude::*;
 
 pub struct OutputLine {
-    pub line_number: u32,
+    pub line_number: usize,
     pub full_word_vec: Vec<String>,
 }
 
 impl OutputLine {
-    fn new(full_word_vec: Vec<String>, line_number: u32) -> OutputLine {
+    fn new(full_word_vec: Vec<String>, line_number: usize) -> OutputLine {
         OutputLine {
             line_number,
             full_word_vec,
         }
     }
 
-    fn from_code_line(line: String, line_number: u32) -> OutputLine {
+    fn from_code_line(line: String, line_number: usize) -> OutputLine {
         // populates a String vec with the words from the code line (split by " ")
         let split_line = {
             let mut split_line_vec = Vec::new();
@@ -51,8 +51,8 @@ impl OutputBlock {
     }
 
     // Faux-construction
-    // processes a single CodePatch into an output-ready OutputBlock
-    fn from_code_patch(code_patch: CodePatch) -> OutputBlock {
+    // processes a single MarkedSection into an output-ready OutputBlock
+    fn from_code_patch(code_patch: MarkedSection) -> OutputBlock {
         let mut special_line = None;
         let mut context_lines_vec = Vec::new();
 
@@ -67,7 +67,7 @@ impl OutputBlock {
             }
         }
         OutputBlock::new(
-            code_patch.patch_type,
+            code_patch.comment_type,
             special_line.unwrap(),
             context_lines_vec,
         )
@@ -97,12 +97,12 @@ impl OutputBlock {
 }
 
 // top-level function for outputting to a markdown file
-pub fn export_to_markdown(code_patches: Vec<CodePatch>, filename: &String) {
+pub fn export_to_markdown(code_patches: Vec<MarkedSection>, filename: &String) {
     let mut todo_output_blocks = Vec::new();
 
     // iterates over the patch vec and populates the output_block vec with the data
     for patch in code_patches {
-        if patch.patch_type == CommentType::Todo {
+        if patch.comment_type == CommentType::Todo {
             todo_output_blocks.push(OutputBlock::from_code_patch(patch));
         }
     }

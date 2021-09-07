@@ -7,7 +7,7 @@ mod printer;
 
 use ansi_term::{self, Colour};
 
-use common_structs::lines::CodePatch;
+use common_structs::MarkedSection;
 use printer::ConsolePrinter;
 
 fn setup_ansi_colors() {
@@ -27,7 +27,7 @@ fn main() {
     let file_lines = parser::read_file_data(cli_args.filename);
 
     // from `file_lines` we make the vec of context-aware "code patches" here
-    let code_patch_vec = CodePatch::unpack_lines(file_lines, cli_args.context);
+    let code_patch_vec = MarkedSection::unpack_lines(file_lines, cli_args.context);
 
     // creating printer and consuming it to display terminal output
     let special_colour = Colour::Purple;

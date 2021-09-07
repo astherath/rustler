@@ -1,6 +1,6 @@
 extern crate ansi_term;
 extern crate clap;
-use super::common_structs::lines::CommentType;
+use super::common_structs::CommentType;
 use ansi_term::Colour;
 use clap::{App, Arg};
 use std::{self, path::Path};

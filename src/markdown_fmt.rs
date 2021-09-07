@@ -1,4 +1,4 @@
-use super::common_structs::lines::CommentType;
+use super::common_structs::CommentType;
 use super::file_io::OutputBlock;
 
 pub fn get_header_str_for_block_type(block_type: &CommentType) -> String {
