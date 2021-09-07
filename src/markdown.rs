@@ -1,12 +1,11 @@
 use std::fmt;
 
-type BuilderResult<T> = Result<T, BuilderError>;
+pub type BuilderResult<T> = Result<T, BuilderError>;
 
 #[derive(Debug)]
-struct MarkdownBuilder {
+pub struct MarkdownBuilder {
     contents: String,
     indentation_level: u8,
-    is_in_list_mode: bool,
 }
 
 impl MarkdownBuilder {
@@ -14,15 +13,10 @@ impl MarkdownBuilder {
         Self {
             contents: String::new(),
             indentation_level: 0,
-            is_in_list_mode: false,
         }
     }
 
     // Monadic builder pattern for markdown creation
-
-    pub fn start_list(mut self) -> Self {
-        self
-    }
 
     pub fn checkbox(mut self) -> Self {
         let md_checkbox = "- [ ] ";
@@ -31,7 +25,22 @@ impl MarkdownBuilder {
     }
 
     pub fn newline(mut self) -> Self {
+        let indent = "\t".repeat(self.indentation_level as usize);
+        self.contents.push_str(&indent);
         self.contents.push('\n');
+        self
+    }
+
+    pub fn indent(mut self) -> Self {
+        self.indentation_level += 1;
+        self
+    }
+
+    pub fn unindent(mut self) -> Self {
+        if self.indentation_level > 0 {
+            self.indentation_level -= 1;
+        }
+
         self
     }
 
@@ -80,7 +89,7 @@ impl MarkdownBuilder {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-enum BuilderError {
+pub enum BuilderError {
     HeaderOutOfBounds,
     TextInsertError(String),
 }
@@ -176,6 +185,39 @@ mod tests {
             assert_eq!(
                 export_string, expected_string,
                 "newline should be present in empty builder export"
+            );
+        }
+
+        #[test]
+        fn single_newline_appended_with_single_indent_correctly() {
+            let builder = get_empty_builder();
+            let export_string = builder.indent().newline().to_markdown_string();
+
+            let expected_string = "\t\n".to_string();
+
+            assert_eq!(
+                export_string, expected_string,
+                "newline with indent should be present in empty builder export"
+            );
+        }
+
+        #[test]
+        fn mutlitple_newlines_adhere_to_single_indent_level() {
+            let mut builder = get_empty_builder().indent();
+
+            let newlines_to_append = 3;
+
+            for _ in 0..newlines_to_append {
+                builder = builder.newline();
+            }
+
+            let export_string = builder.to_markdown_string();
+
+            let expected_string = "\t\n".repeat(newlines_to_append);
+
+            assert_eq!(
+                export_string, expected_string,
+                "multiple newlines should adhere to the same indent level"
             );
         }
     }

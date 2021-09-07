@@ -1,5 +1,6 @@
 use super::common_structs::CommentType;
 use super::file_io::OutputBlock;
+use super::markdown;
 
 pub fn get_header_str_for_block_type(block_type: &CommentType) -> String {
     match block_type {
