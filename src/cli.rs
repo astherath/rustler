@@ -1,6 +1,6 @@
 extern crate ansi_term;
 extern crate clap;
-use super::common_structs::lines::CodePatchType;
+use super::common_structs::lines::CommentType;
 use ansi_term::Colour;
 use clap::{App, Arg};
 use std::{self, path::Path};
@@ -8,7 +8,7 @@ use std::{self, path::Path};
 pub struct CommandLineArgs {
     pub filename: String,
     pub context: usize,
-    pub display_type: CodePatchType,
+    pub display_type: CommentType,
     pub output_filename: Option<String>,
     pub markdown_output_flag: bool,
 }
@@ -77,7 +77,7 @@ impl CommandLineArgs {
 
         // gets the type of the display wanted
         let display_type_arg = matches.value_of("type").unwrap_or("all").to_string();
-        let display_type = CodePatchType::get_display_type(&display_type_arg);
+        let display_type = CommentType::get_display_type(&display_type_arg);
 
         // sets output filename if one given
         let markdown_output_flag;

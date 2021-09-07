@@ -1,13 +1,13 @@
-use super::common_structs::lines::CodePatchType;
+use super::common_structs::lines::CommentType;
 use super::file_io::OutputBlock;
 
-pub fn get_header_str_for_block_type(block_type: &CodePatchType) -> String {
+pub fn get_header_str_for_block_type(block_type: &CommentType) -> String {
     match block_type {
-        CodePatchType::Todo => "## TODO's\n\n",
-        CodePatchType::Fixme => "## TODO's\n\n",
-        CodePatchType::Note => "## TODO's\n\n",
-        CodePatchType::XXX => "## TODO's\n\n",
-        CodePatchType::Other => "",
+        CommentType::Todo => "## TODO's\n\n",
+        CommentType::Fixme => "## TODO's\n\n",
+        CommentType::Note => "## TODO's\n\n",
+        CommentType::XXX => "## TODO's\n\n",
+        CommentType::Other => "",
     }
     .to_string()
 }
@@ -30,7 +30,7 @@ pub fn get_output_str_for_block(block: OutputBlock) -> String {
         return output_str;
     }
 
-    // FIXME: the first part of the string is hardcoded, should be reliant on the CodePatchType for the block
+    // FIXME: the first part of the string is hardcoded, should be reliant on the CommentType for the block
 
     // pushes the context header string
     output_str.push_str(&format!(

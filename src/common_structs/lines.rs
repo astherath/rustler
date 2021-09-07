@@ -1,8 +1,9 @@
-use std::cmp;
-use std::convert::TryInto;
+use std::{cmp, convert::TryInto};
 
+/// Represents the different types of breadcrumb comments that
+/// can be detected by the parser.
 #[derive(PartialEq, Clone)]
-pub enum CodePatchType {
+pub enum CommentType {
     Todo,
     Fixme,
     Note,
@@ -10,8 +11,8 @@ pub enum CodePatchType {
     Other,
 }
 
-impl CodePatchType {
-    /// Factory method in-place of a constructor for creating CodePatchTypes
+impl CommentType {
+    /// Factory method in-place of a constructor for creating CommentTypes
     ///
     /// # Arguments
     ///
@@ -19,28 +20,28 @@ impl CodePatchType {
     ///
     /// # Returns
     ///
-    /// A CodePatchType instance
+    /// A CommentType instance
     ///
     /// # Note
     ///
     /// This function should only be called if the line has been proven to be "special" already.
-    /// If not, it will silently return a `CodePatchType::Other` which may have unintended effects.
-    fn get_special_line_type(line_str: &String) -> CodePatchType {
+    /// If not, it will silently return a `CommentType::Other` which may have unintended effects.
+    fn get_special_line_type(line_str: &String) -> CommentType {
         let lower_line = line_str.to_lowercase();
         if lower_line.contains("todo") {
-            CodePatchType::Todo
+            CommentType::Todo
         } else if lower_line.contains("fixme") {
-            CodePatchType::Fixme
+            CommentType::Fixme
         } else if lower_line.contains("note") {
-            CodePatchType::Note
+            CommentType::Note
         } else if lower_line.contains("xxx") {
-            CodePatchType::XXX
+            CommentType::XXX
         } else {
-            CodePatchType::Other
+            CommentType::Other
         }
     }
 
-    /// Factory method in-place of a constructor for creating CodePatchType instances for display args
+    /// Factory method in-place of a constructor for creating CommentType instances for display args
     ///
     /// # Arguments
     ///
@@ -48,27 +49,27 @@ impl CodePatchType {
     ///
     /// # Returns
     ///
-    /// A CodePatchType instance
+    /// A [`CommentType`](CommentType) instance
     ///
     /// # Note
     ///
-    /// If no match is found, will return `CodePatchType::All`.
-    pub fn get_display_type(type_opt: &String) -> CodePatchType {
+    /// If no match is found, will return [`CommentType::All`](CommentType::All).
+    pub fn get_display_type(type_opt: &String) -> CommentType {
         if type_opt == "todo" {
-            CodePatchType::Todo
+            CommentType::Todo
         } else if type_opt == "fixme" {
-            CodePatchType::Fixme
+            CommentType::Fixme
         } else if type_opt == "note" {
-            CodePatchType::Note
+            CommentType::Note
         } else if type_opt == "xxx" {
-            CodePatchType::XXX
+            CommentType::XXX
         } else {
-            CodePatchType::Other
+            CommentType::Other
         }
     }
 
     fn check_line_special(line: &String) -> bool {
-        CodePatchType::get_special_line_type(line) != CodePatchType::Other
+        CommentType::get_special_line_type(line) != CommentType::Other
     }
 }
 
@@ -90,11 +91,11 @@ impl CodeLine {
 
 pub struct CodePatch {
     pub lines: Vec<CodeLine>,
-    pub patch_type: CodePatchType,
+    pub patch_type: CommentType,
 }
 
 impl CodePatch {
-    pub fn new(lines: Vec<CodeLine>, patch_type: CodePatchType) -> CodePatch {
+    pub fn new(lines: Vec<CodeLine>, patch_type: CommentType) -> CodePatch {
         CodePatch { lines, patch_type }
     }
 
@@ -122,7 +123,7 @@ impl CodePatch {
         let mut i = 0;
 
         while i < lines_len {
-            if CodePatchType::check_line_special(&lines[i]) {
+            if CommentType::check_line_special(&lines[i]) {
                 // re-cyclable vec to hold the CodeLines for a single CodePatch
                 let mut code_lines_vec = Vec::new();
 
@@ -154,7 +155,7 @@ impl CodePatch {
                 }
 
                 // get actual type of special line
-                let patch_type = CodePatchType::get_special_line_type(&lines[i]);
+                let patch_type = CommentType::get_special_line_type(&lines[i]);
 
                 code_patch_vec.push(CodePatch::new(code_lines_vec, patch_type));
             }

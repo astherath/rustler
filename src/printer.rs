@@ -1,4 +1,4 @@
-use super::common_structs::lines::{CodeLine, CodePatch, CodePatchType};
+use super::common_structs::lines::{CodeLine, CodePatch, CommentType};
 use ansi_term::Colour;
 
 fn print_separator() {
@@ -22,8 +22,8 @@ impl ConsolePrinter {
         ConsolePrinter { special_colour }
     }
 
-    pub fn print_all_lines(&self, code_patches: &Vec<CodePatch>, display_type: CodePatchType) {
-        let display_all = display_type == CodePatchType::Other;
+    pub fn print_all_lines(&self, code_patches: &Vec<CodePatch>, display_type: CommentType) {
+        let display_all = display_type == CommentType::Other;
 
         for patch in code_patches {
             if !display_all {

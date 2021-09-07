@@ -1,4 +1,4 @@
-use super::common_structs::lines::{CodePatch, CodePatchType};
+use super::common_structs::lines::{CodePatch, CommentType};
 use super::markdown_fmt;
 use std::fs::File;
 use std::io::prelude::*;
@@ -32,14 +32,14 @@ impl OutputLine {
 }
 
 pub struct OutputBlock {
-    pub block_type: CodePatchType,
+    pub block_type: CommentType,
     pub special_line: OutputLine,
     pub context_lines: Vec<OutputLine>,
 }
 
 impl OutputBlock {
     fn new(
-        block_type: CodePatchType,
+        block_type: CommentType,
         special_line: OutputLine,
         context_lines: Vec<OutputLine>,
     ) -> OutputBlock {
@@ -79,7 +79,7 @@ impl OutputBlock {
         //          (i.e. the block handling is the same regardless)
 
         let mut output_str = String::new();
-        let mut last_block_type = CodePatchType::Other;
+        let mut last_block_type = CommentType::Other;
 
         // iterates over the block vec, appending the markdown output_str for each block
         // also pushes a new the header if needed (for new block_type)
@@ -102,7 +102,7 @@ pub fn export_to_markdown(code_patches: Vec<CodePatch>, filename: &String) {
 
     // iterates over the patch vec and populates the output_block vec with the data
     for patch in code_patches {
-        if patch.patch_type == CodePatchType::Todo {
+        if patch.patch_type == CommentType::Todo {
             todo_output_blocks.push(OutputBlock::from_code_patch(patch));
         }
     }
