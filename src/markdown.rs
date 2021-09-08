@@ -8,6 +8,29 @@ pub struct MarkdownBuilder {
     indentation_level: u8,
 }
 
+#[derive(Debug, Clone)]
+pub enum HeaderLevel {
+    H1,
+    H2,
+    H3,
+    H4,
+    H5,
+    H6,
+}
+
+impl HeaderLevel {
+    fn to_numeric(self) -> usize {
+        match self {
+            Self::H1 => 1,
+            Self::H2 => 2,
+            Self::H3 => 3,
+            Self::H4 => 4,
+            Self::H5 => 5,
+            Self::H6 => 6,
+        }
+    }
+}
+
 impl MarkdownBuilder {
     pub fn new() -> Self {
         Self {
@@ -18,16 +41,20 @@ impl MarkdownBuilder {
 
     // Monadic builder pattern for markdown creation
 
-    pub fn checkbox(mut self) -> Self {
-        let md_checkbox = "- [ ] ";
-        self.contents.push_str(md_checkbox);
+    /// Adds a MD header
+    pub fn header(mut self, level: HeaderLevel) -> Self {
+        let header = format!("{} ", "#".repeat(level.to_numeric()));
+        self.contents.push_str(&header);
         self
     }
 
     pub fn newline(mut self) -> Self {
-        let indent = "\t".repeat(self.indentation_level as usize);
-        self.contents.push_str(&indent);
         self.contents.push('\n');
+        for _ in 0..self.indentation_level {
+            self.contents.push('\t');
+        }
+        // let indent = "\t".repeat(self.indentation_level as usize);
+        // self.contents.push_str(&indent);
         self
     }
 
@@ -44,6 +71,12 @@ impl MarkdownBuilder {
         self
     }
 
+    pub fn checkbox(mut self) -> Self {
+        let md_checkbox = "- [ ] ";
+        self.contents.push_str(md_checkbox);
+        self
+    }
+
     /// Inserts text at the current position in the cursor.
     ///
     /// Will return an [`Err`](BuilderError) if the contents include a newline or a tab/indent character
@@ -55,19 +88,6 @@ impl MarkdownBuilder {
         }
         self.contents.push_str(text);
         Ok(self)
-    }
-
-    /// Adds a MD header.
-    ///
-    /// Note: the header level must be (0, 6]
-    pub fn header(mut self, level: u8) -> BuilderResult<Self> {
-        match level {
-            0..=6 => {
-                self.contents.push_str(&"#".repeat(level as usize));
-                Ok(self)
-            }
-            _ => Err(BuilderError::HeaderOutOfBounds),
-        }
     }
 
     /// Finishes the builder pattern by consuming `Self` and returning the final string
@@ -90,14 +110,12 @@ impl MarkdownBuilder {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum BuilderError {
-    HeaderOutOfBounds,
     TextInsertError(String),
 }
 
 impl fmt::Display for BuilderError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let message = match self {
-            Self::HeaderOutOfBounds => "Header level invalid, must be (0, 6]".to_string(),
             Self::TextInsertError(reason) => format!(
                 "Text to be inserted contains invalid characters: {}",
                 reason
@@ -193,7 +211,7 @@ mod tests {
             let builder = get_empty_builder();
             let export_string = builder.indent().newline().to_markdown_string();
 
-            let expected_string = "\t\n".to_string();
+            let expected_string = "\n\t".to_string();
 
             assert_eq!(
                 export_string, expected_string,
@@ -213,7 +231,57 @@ mod tests {
 
             let export_string = builder.to_markdown_string();
 
-            let expected_string = "\t\n".repeat(newlines_to_append);
+            let expected_string = "\n\t".repeat(newlines_to_append);
+
+            assert_eq!(
+                export_string, expected_string,
+                "multiple newlines should adhere to the same indent level"
+            );
+        }
+
+        #[test]
+        fn single_newline_adheres_to_multiple_indents() {
+            let indent_level = 3;
+            let mut builder = get_empty_builder();
+            for _ in 0..indent_level {
+                builder = builder.indent();
+            }
+
+            let newlines_to_append = 3;
+
+            for _ in 0..newlines_to_append {
+                builder = builder.newline();
+            }
+
+            let export_string = builder.to_markdown_string();
+
+            let indent_string = "\t".repeat(indent_level);
+            let expected_string = format!("\n{}", &indent_string).repeat(newlines_to_append);
+
+            assert_eq!(
+                export_string, expected_string,
+                "multiple newlines should adhere to the same indent level"
+            );
+        }
+
+        #[test]
+        fn multiple_newline_adheres_to_multiple_indents() {
+            let indent_level = 5;
+            let mut builder = get_empty_builder();
+            for _ in 0..indent_level {
+                builder = builder.indent();
+            }
+
+            let newlines_to_append = 6;
+
+            for _ in 0..newlines_to_append {
+                builder = builder.newline();
+            }
+
+            let export_string = builder.to_markdown_string();
+
+            let indent_string = "\t".repeat(indent_level);
+            let expected_string = format!("\n{}", &indent_string).repeat(newlines_to_append);
 
             assert_eq!(
                 export_string, expected_string,
@@ -243,35 +311,13 @@ mod tests {
         use super::*;
 
         #[test]
-        fn header_checks_bounds() {
-            let builder = get_empty_builder();
-            let upper_out_of_bounds_header_level = 7;
-
-            // no need to check for lower bound where n < 0 since datatype is u8.
-            let result = builder.header(upper_out_of_bounds_header_level);
-
-            assert!(
-                result.is_err(),
-                "header addition should return err if our of bounds"
-            );
-            assert_eq!(
-                result.unwrap_err(),
-                BuilderError::HeaderOutOfBounds,
-                "error type should be 'HeaderOutOfBounds'"
-            );
-        }
-
-        #[test]
         fn header_builds_correctly() {
             let builder = get_empty_builder();
-            let header_level = 4;
+            let header_level = HeaderLevel::H4;
 
-            let export_string = builder
-                .header(header_level)
-                .expect("header level is valid and should not return Err")
-                .to_markdown_string();
+            let export_string = builder.header(HeaderLevel::H4).to_markdown_string();
 
-            let expected_string = "#".repeat(header_level as usize).to_string();
+            let expected_string = format!("{} ", "#".repeat(header_level.to_numeric()));
             assert_eq!(
                 export_string, expected_string,
                 "header should be appended if level is within bounds"

@@ -1,19 +1,90 @@
 use super::common_structs::CommentType;
 use super::file_io::OutputBlock;
-use super::markdown;
+use super::markdown::{HeaderLevel, MarkdownBuilder};
 
-pub fn get_header_str_for_block_type(block_type: &CommentType) -> String {
-    match block_type {
-        CommentType::Todo => "## TODO's\n\n",
-        CommentType::Fixme => "## TODO's\n\n",
-        CommentType::Note => "## TODO's\n\n",
-        CommentType::XXX => "## TODO's\n\n",
-        CommentType::Other => "",
-    }
-    .to_string()
+pub fn get_header_str_for_block_type(block_type: &CommentType) -> MarkdownBuilder {
+    let header_title = match block_type {
+        CommentType::Todo => "TODO's",
+        CommentType::Fixme => "FIXME's",
+        CommentType::Note => "NOTE's",
+        CommentType::XXX => "XXX's",
+        CommentType::Other => "OTHER",
+    };
+
+    MarkdownBuilder::new()
+        .header(HeaderLevel::H2)
+        .insert_single_line(header_title)
+        .unwrap()
+        .newline()
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn header_created_correctly() {
+        let expected_string = "## TODO's\n";
+        let header_string = get_header_str_for_block_type(&CommentType::Todo).to_markdown_string();
+
+        assert_eq!(expected_string, header_string);
+    }
+}
+
+// pub fn get_output_str_for_block_md(block: OutputBlock) -> String {
 pub fn get_output_str_for_block(block: OutputBlock) -> String {
+    let mut md_builder = MarkdownBuilder::new()
+        .checkbox()
+        .header(HeaderLevel::H4)
+        .insert_single_line(&block.special_line.tokenized_line.join(" "))
+        .unwrap()
+        .indent()
+        .newline();
+
+    if block.context_lines.len() == 0 {
+        return md_builder.to_markdown_string();
+    }
+
+    md_builder = md_builder
+        .indent()
+        .newline()
+        .insert_single_line("- ")
+        .unwrap()
+        .header(HeaderLevel::H5)
+        .insert_single_line(&format!(
+            "Context for TODO in line #{}",
+            block.special_line.line_number
+        ))
+        .unwrap()
+        .newline();
+
+    md_builder = md_builder
+        .indent()
+        .newline()
+        .insert_single_line("- ```")
+        .unwrap()
+        .indent()
+        .newline();
+
+    let lines_in_block = block
+        .context_lines
+        .into_iter()
+        .filter(|x| x.tokenized_line.len() > 1)
+        .map(|x| x.tokenized_line.join(" "))
+        .collect::<Vec<String>>();
+
+    for line in lines_in_block {
+        md_builder = md_builder.insert_single_line(&line).unwrap().newline()
+    }
+
+    md_builder
+        .insert_single_line("```")
+        .unwrap()
+        .newline()
+        .to_markdown_string()
+}
+
+pub fn _get_output_str_for_block(block: OutputBlock) -> String {
     let mut output_str = String::new();
 
     // MD format for a checkbox and a leading h4
