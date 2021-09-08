@@ -21,7 +21,7 @@ pub fn get_output_str_for_block(block: OutputBlock) -> String {
 
     // pushes the words together into a single string
     // (this gives us a chance to sanitize the words one by one)
-    for word in block.special_line.full_word_vec {
+    for word in block.special_line.tokenized_line {
         output_str.push_str(&format!("{} ", &word));
     }
     output_str.push_str("\n");
@@ -42,11 +42,11 @@ pub fn get_output_str_for_block(block: OutputBlock) -> String {
     // builds the lines of context word by word (again, sanitizing)
     output_str.push_str("\t\t- ```\n");
     for line in block.context_lines {
-        if line.full_word_vec.len() == 1 {
+        if line.tokenized_line.len() == 1 {
             continue;
         }
         output_str.push_str("\t\t\t");
-        for word in line.full_word_vec {
+        for word in line.tokenized_line {
             // check so as to avoid single char lines
             output_str.push_str(&format!("{} ", &word));
         }
