@@ -3,15 +3,18 @@ use super::markdown::{HeaderLevel, MarkdownBuilder};
 
 /// Processes the given [`OutputBlock`s](OutputBlock) into a single markdown
 /// string, ready to write to file.
-pub fn get_markdown_output_str(output_blocks: Vec<OutputBlock>) -> String {
+pub fn get_markdown_output_str(
+    output_blocks: Vec<OutputBlock>,
+    file_extension: Option<&str>,
+) -> String {
     output_blocks
         .into_iter()
-        .map(|x| get_output_str_for_block(x))
+        .map(|x| get_output_str_for_block(x, file_extension))
         .collect::<Vec<String>>()
         .join("")
 }
 
-fn get_output_str_for_block(block: OutputBlock) -> String {
+fn get_output_str_for_block(block: OutputBlock, file_extension: Option<&str>) -> String {
     let mut md_builder = MarkdownBuilder::new();
 
     md_builder = header_for_output_block(md_builder, &block);
@@ -21,7 +24,7 @@ fn get_output_str_for_block(block: OutputBlock) -> String {
     }
 
     md_builder = context_block_header(md_builder, &block);
-    md_builder = context_block_inner_code(md_builder, block);
+    md_builder = context_block_inner_code(md_builder, block, file_extension);
     md_builder.to_markdown_string()
 }
 
@@ -50,11 +53,32 @@ fn context_block_header(builder: MarkdownBuilder, block: &OutputBlock) -> Markdo
         .newline()
 }
 
-fn context_block_inner_code(mut builder: MarkdownBuilder, block: OutputBlock) -> MarkdownBuilder {
+fn get_code_block_name_from_extension(file_extension: Option<&str>) -> &str {
+    if file_extension.is_none() {
+        return "";
+    }
+    match file_extension.unwrap() {
+        "py" => "python",
+        "rs" => "rust",
+        "js" => "javascript",
+        "ts" => "typescript",
+        "cs" => "c#",
+        _ => "",
+    }
+}
+
+fn context_block_inner_code(
+    mut builder: MarkdownBuilder,
+    block: OutputBlock,
+    file_extension: Option<&str>,
+) -> MarkdownBuilder {
     builder = builder
         .increase_indentation_level()
         .newline()
-        .insert_single_line("- ```")
+        .insert_single_line(&format!(
+            "- ```{}",
+            get_code_block_name_from_extension(file_extension)
+        ))
         .unwrap()
         .increase_indentation_level()
         .newline()

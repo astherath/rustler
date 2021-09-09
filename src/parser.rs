@@ -4,7 +4,7 @@ use std::io::{self, BufRead};
 use std::path::Path;
 
 /// Top-level function to mask the usage of the FileParser for a simple interface
-pub fn read_file_data(filename: String) -> Vec<String> {
+pub fn read_file_data(filename: &str) -> Vec<String> {
     let file_op = FileParser::new(filename);
     file_op.lines
 }
@@ -24,8 +24,8 @@ impl FileParser {
     ///
     /// The filename is NOT checked to exist at this point.
     /// However the file will be checked for completion on read so no double check needed.
-    fn new(filename: String) -> FileParser {
-        let lines = FileParser::get_lines_from_file(&filename);
+    fn new(filename: &str) -> FileParser {
+        let lines = FileParser::get_lines_from_file(filename);
         FileParser { lines }
     }
 
@@ -38,7 +38,7 @@ impl FileParser {
     /// # Returns
     ///
     /// `Vec<String>` of all of the lines in the file
-    fn get_lines_from_file(filename: &String) -> Vec<String> {
+    fn get_lines_from_file(filename: &str) -> Vec<String> {
         let path = Path::new(filename);
         let file = match File::open(&path) {
             Err(why) => panic!(
