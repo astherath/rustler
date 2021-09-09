@@ -40,9 +40,6 @@ impl MarkdownBuilder {
         }
     }
 
-    // Monadic builder pattern for markdown creation
-
-    /// Adds a MD header
     pub fn header(mut self, level: HeaderLevel) -> Self {
         let header = format!("{} ", "#".repeat(level.to_numeric()));
         self.contents.push_str(&header);
@@ -54,8 +51,6 @@ impl MarkdownBuilder {
         for _ in 0..self.indentation_level {
             self.contents.push('\t');
         }
-        // let indent = "\t".repeat(self.indentation_level as usize);
-        // self.contents.push_str(&indent);
         self
     }
 

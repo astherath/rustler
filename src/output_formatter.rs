@@ -1,7 +1,17 @@
-use super::file_io::OutputBlock;
+use super::common_structs::OutputBlock;
 use super::markdown::{HeaderLevel, MarkdownBuilder};
 
-pub fn get_output_str_for_block(block: OutputBlock) -> String {
+/// Processes the given [`OutputBlock`s](OutputBlock) into a single markdown
+/// string, ready to write to file.
+pub fn get_markdown_output_str(output_blocks: Vec<OutputBlock>) -> String {
+    output_blocks
+        .into_iter()
+        .map(|x| get_output_str_for_block(x))
+        .collect::<Vec<String>>()
+        .join("")
+}
+
+fn get_output_str_for_block(block: OutputBlock) -> String {
     let mut md_builder = MarkdownBuilder::new();
 
     md_builder = header_for_output_block(md_builder, &block);

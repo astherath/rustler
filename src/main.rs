@@ -38,6 +38,6 @@ fn main() {
     // file output operations handled by the writer methods IF the output flag is set and valid
     if cli_args.markdown_output_flag {
         let output_filename = cli_args.output_filename.unwrap();
-        file_io::export_to_markdown(code_patch_vec, &output_filename);
+        file_io::export_marked_sections_to_markdown_file(code_patch_vec, &output_filename);
     }
 }
