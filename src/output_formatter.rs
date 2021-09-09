@@ -18,19 +18,6 @@ pub fn get_header_str_for_block_type(block_type: &CommentType) -> MarkdownBuilde
         .newline()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn header_created_correctly() {
-        let expected_string = "## TODO's\n";
-        let header_string = get_header_str_for_block_type(&CommentType::Todo).to_markdown_string();
-
-        assert_eq!(expected_string, header_string);
-    }
-}
-
 // pub fn get_output_str_for_block_md(block: OutputBlock) -> String {
 pub fn get_output_str_for_block(block: OutputBlock) -> String {
     let mut md_builder = MarkdownBuilder::new()
@@ -46,7 +33,6 @@ pub fn get_output_str_for_block(block: OutputBlock) -> String {
     }
 
     md_builder = md_builder
-        .indent()
         .newline()
         .insert_single_line("- ")
         .unwrap()
@@ -128,4 +114,17 @@ pub fn _get_output_str_for_block(block: OutputBlock) -> String {
     }
     output_str.push_str("\t\t\t```\n");
     output_str
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn header_created_correctly() {
+        let expected_string = "## TODO's\n";
+        let header_string = get_header_str_for_block_type(&CommentType::Todo).to_markdown_string();
+
+        assert_eq!(expected_string, header_string);
+    }
 }

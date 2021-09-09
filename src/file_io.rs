@@ -1,7 +1,6 @@
 use super::common_structs::{CommentType, MarkedSection};
 use super::output_formatter;
-use std::fs::{self, File};
-use std::io::prelude::*;
+use std::fs;
 
 pub struct TokenizedLine {
     pub line_number: usize,
@@ -59,7 +58,7 @@ impl OutputBlock {
     }
 }
 
-// top-level function for outputting to a markdown file
+/// top-level function for outputting to a markdown file
 pub fn export_to_markdown(marked_sections: Vec<MarkedSection>, filename: &String) {
     let markdown_output_str = OutputBlock::get_markdown_output_str(
         marked_sections
@@ -67,11 +66,6 @@ pub fn export_to_markdown(marked_sections: Vec<MarkedSection>, filename: &String
             .map(|x| OutputBlock::from_marked_section(x))
             .collect::<Vec<OutputBlock>>(),
     );
-
-    // let mut file = File::create(filename).unwrap();
-    // file.write_all(&markdown_output_str.as_bytes()).unwrap();
-
-    // println!("md output: {}", &markdown_output_str);
 
     fs::write(filename, &markdown_output_str.as_bytes()).unwrap();
 }

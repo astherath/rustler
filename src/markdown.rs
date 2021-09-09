@@ -5,7 +5,7 @@ pub type BuilderResult<T> = Result<T, BuilderError>;
 #[derive(Debug)]
 pub struct MarkdownBuilder {
     contents: String,
-    indentation_level: u8,
+    pub indentation_level: u8,
 }
 
 #[derive(Debug, Clone)]
@@ -63,11 +63,8 @@ impl MarkdownBuilder {
         self
     }
 
-    pub fn unindent(mut self) -> Self {
-        if self.indentation_level > 0 {
-            self.indentation_level -= 1;
-        }
-
+    pub fn reset_indentation(mut self) -> Self {
+        self.indentation_level = 0;
         self
     }
 
@@ -321,6 +318,54 @@ mod tests {
             assert_eq!(
                 export_string, expected_string,
                 "header should be appended if level is within bounds"
+            );
+        }
+    }
+
+    mod indentation {
+        use super::*;
+
+        #[test]
+        fn indent_level_is_added_correctly() {
+            let mut builder = get_empty_builder();
+            assert_eq!(
+                builder.indentation_level, 0,
+                "should start with 0 indentation"
+            );
+
+            let indent_level = 6;
+            for _ in 0..indent_level {
+                builder = builder.indent();
+            }
+
+            assert_eq!(
+                indent_level, builder.indentation_level,
+                "should match indentation level of builder"
+            );
+        }
+
+        #[test]
+        fn indent_level_is_reset_correctly() {
+            let mut builder = get_empty_builder();
+            assert_eq!(
+                builder.indentation_level, 0,
+                "should start with 0 indentation"
+            );
+
+            let indent_level = 6;
+            for _ in 0..indent_level {
+                builder = builder.indent();
+            }
+
+            assert_eq!(
+                indent_level, builder.indentation_level,
+                "should match indentation level of builder"
+            );
+
+            builder = builder.reset_indentation();
+            assert_eq!(
+                builder.indentation_level, 0,
+                "indent level should be 0 post-reset"
             );
         }
     }
