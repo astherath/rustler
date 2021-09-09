@@ -8,6 +8,7 @@ pub struct MarkdownBuilder {
     pub indentation_level: u8,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub enum HeaderLevel {
     H1,
@@ -58,7 +59,7 @@ impl MarkdownBuilder {
         self
     }
 
-    pub fn indent(mut self) -> Self {
+    pub fn increase_indentation_level(mut self) -> Self {
         self.indentation_level += 1;
         self
     }
@@ -206,7 +207,10 @@ mod tests {
         #[test]
         fn single_newline_appended_with_single_indent_correctly() {
             let builder = get_empty_builder();
-            let export_string = builder.indent().newline().to_markdown_string();
+            let export_string = builder
+                .increase_indentation_level()
+                .newline()
+                .to_markdown_string();
 
             let expected_string = "\n\t".to_string();
 
@@ -218,7 +222,7 @@ mod tests {
 
         #[test]
         fn mutlitple_newlines_adhere_to_single_indent_level() {
-            let mut builder = get_empty_builder().indent();
+            let mut builder = get_empty_builder().increase_indentation_level();
 
             let newlines_to_append = 3;
 
@@ -241,7 +245,7 @@ mod tests {
             let indent_level = 3;
             let mut builder = get_empty_builder();
             for _ in 0..indent_level {
-                builder = builder.indent();
+                builder = builder.increase_indentation_level();
             }
 
             let newlines_to_append = 3;
@@ -266,7 +270,7 @@ mod tests {
             let indent_level = 5;
             let mut builder = get_empty_builder();
             for _ in 0..indent_level {
-                builder = builder.indent();
+                builder = builder.increase_indentation_level();
             }
 
             let newlines_to_append = 6;
@@ -335,7 +339,7 @@ mod tests {
 
             let indent_level = 6;
             for _ in 0..indent_level {
-                builder = builder.indent();
+                builder = builder.increase_indentation_level();
             }
 
             assert_eq!(
@@ -354,7 +358,7 @@ mod tests {
 
             let indent_level = 6;
             for _ in 0..indent_level {
-                builder = builder.indent();
+                builder = builder.increase_indentation_level();
             }
 
             assert_eq!(

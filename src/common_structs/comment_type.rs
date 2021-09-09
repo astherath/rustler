@@ -1,3 +1,5 @@
+use std::fmt;
+
 /// Represents the different types of breadcrumb comments that
 /// can be detected by the parser.
 #[derive(PartialEq, Clone)]
@@ -55,5 +57,19 @@ impl CommentType {
 
     pub fn check_line_special(line: &String) -> bool {
         Self::get_special_line_type(line) != Self::Other
+    }
+}
+
+impl fmt::Display for CommentType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let comment_type = match self {
+            Self::Todo => "Todo",
+            Self::Fixme => "Fixme",
+            Self::Note => "Note",
+            Self::XXX => "XXX",
+            Self::Other => "Other",
+        };
+        write!(f, "{}", comment_type)?;
+        Ok(())
     }
 }
