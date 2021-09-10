@@ -27,7 +27,7 @@ fn main() {
     let cli_args = cli::CommandLineArgs::new();
 
     // `file_lines` a vec of all of the non-empty lines (Strings) in the file
-    let file_lines = parser::read_file_data(&cli_args.filename);
+    let file_lines = parser::read_file_data(&cli_args.input_path);
 
     // from `file_lines` we make the vec of context-aware "code patches" here
     let code_patch = MarkedSection::unpack_lines(file_lines, cli_args.context);
@@ -38,7 +38,7 @@ fn main() {
 
     // output to markdown if export flag is set
     if cli_args.markdown_output_flag {
-        let file_extension = Path::new(&cli_args.filename)
+        let file_extension = Path::new(&cli_args.input_path)
             .extension()
             .and_then(OsStr::to_str);
         let output_filename = cli_args.output_filename.unwrap();
