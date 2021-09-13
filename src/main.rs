@@ -8,6 +8,7 @@ mod printer;
 
 use ansi_term::{self, Colour};
 use std::ffi::OsStr;
+use std::fmt;
 use std::path::Path;
 
 use common_structs::MarkedSection;
@@ -27,10 +28,13 @@ fn main() {
     let cli_args = cli::CommandLineArgs::new();
 
     // `file_lines` a vec of all of the non-empty lines (Strings) in the file
-    let file_lines = parser::read_file_data(&cli_args.input_path);
+    let parsed_data = match parser::read_data_for_path(&cli_args.input_path) {
+        Ok(data) => data,
+        Err(error) => raise_io_error(error),
+    };
 
     // from `file_lines` we make the vec of context-aware "code patches" here
-    let code_patch = MarkedSection::unpack_lines(file_lines, cli_args.context);
+    let code_patch = MarkedSection::unpack_lines(parsed_data, cli_args.context);
 
     // creating printer and consuming it to display terminal output
     let printer = ConsolePrinter::new(Colour::Purple);
@@ -47,11 +51,18 @@ fn main() {
             file_extension,
             &output_filename,
         ) {
-            clap::Error::with_description(
-                &format!("Error exporting markdown to file: {}", error),
-                clap::ErrorKind::Io,
-            )
-            .exit()
+            raise_io_error(error)
         }
     }
+}
+
+fn raise_io_error<T: fmt::Display>(error: T) -> ! {
+    clap::Error::with_description(
+        &format!(
+            "Error with file I/O: {}. Please check privileges and try again",
+            error
+        ),
+        clap::ErrorKind::Io,
+    )
+    .exit()
 }

@@ -1,20 +1,20 @@
+use super::common_structs::{ParseData, ParsedDirectory, ParsedFile};
 use ansi_term::Colour;
 use std::fs::{self, DirEntry, File};
 use std::io::{self, BufRead};
 use std::path::Path;
 
-struct ParsedDirectory {
-    directory_path: String,
-    files: Vec<ParsedFile>,
-}
-
-struct ParsedFile {
-    filename: String,
-    lines: Vec<String>,
+/// Note: this can either be a single file or an actual directory
+pub fn read_data_for_path(path: &str) -> io::Result<ParseData> {
+    if Path::new(path).is_dir() {
+        Ok(ParseData::Directory(read_directory_data_recursive(path)?))
+    } else {
+        Ok(ParseData::File(read_file_data(path)?))
+    }
 }
 
 pub fn read_directory_data_recursive(directory_path: &str) -> io::Result<ParsedDirectory> {
-    let files = vec![];
+    let files = get_parsed_files_for_dir_rec(directory_path)?;
 
     Ok(ParsedDirectory {
         directory_path: directory_path.to_string(),
@@ -31,39 +31,37 @@ pub fn read_file_data(file_path: &str) -> io::Result<ParsedFile> {
     })
 }
 
-fn parse_all_(directory_path: &str) -> io::Result<ParsedDirectory> {
-    struct UncheckedFileData {
-        filename: String,
-        unchecked_lines: io::Result<Vec<String>>,
-    }
-    let mut unchecked_files: Vec<UncheckedFileData> = vec![];
-    let process = |dir: &DirEntry| {
-        let path = dir.path().as_os_str().to_str().unwrap();
-        let lines = get_lines_from_file(&path);
-        let parsed_file = UncheckedFileData {
-            filename: path.to_string(),
-            unchecked_lines: lines,
-        };
-        unchecked_files.push(parsed_file);
-    };
-    visit_dirs(&Path::new(directory_path), &process)?;
+fn get_parsed_files_for_dir_rec(directory_path: &str) -> io::Result<Vec<ParsedFile>> {
+    let unchecked_files = get_unchecked_files_for_dir_rec(directory_path)?;
 
-    let files = vec![];
+    let mut files = vec![];
     for file_result in unchecked_files {
         files.push(ParsedFile {
-            filename: file_result.filename,
-            lines: file_result.unchecked_lines?,
+            filename: file_result.0,
+            lines: file_result.1?,
         });
     }
 
-    Ok(ParsedDirectory {
-        directory_path: directory_path.to_string(),
-        files,
-    })
+    Ok(files)
+}
+
+fn get_unchecked_files_for_dir_rec(
+    directory_path: &str,
+) -> io::Result<Vec<(String, io::Result<Vec<String>>)>> {
+    type UncheckedFileData = (String, io::Result<Vec<String>>);
+    let mut unchecked_files: Vec<UncheckedFileData> = vec![];
+    let mut process = |dir: &DirEntry| {
+        let dir_path = dir.path();
+        let path = dir_path.as_os_str().to_str().unwrap();
+        let lines = get_lines_from_file(&path);
+        unchecked_files.push((path.to_string(), lines));
+    };
+    visit_dirs(&Path::new(directory_path), &mut process)?;
+    Ok(unchecked_files)
 }
 
 // one possible implementation of walking a directory only visiting files
-fn visit_dirs(dir: &Path, cb: &dyn FnMut(&DirEntry)) -> io::Result<()> {
+fn visit_dirs(dir: &Path, cb: &mut dyn FnMut(&DirEntry)) -> io::Result<()> {
     if dir.is_dir() {
         for entry in fs::read_dir(dir)? {
             let entry = entry?;

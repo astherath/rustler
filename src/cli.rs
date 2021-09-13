@@ -31,14 +31,19 @@ impl CommandLineArgs {
                 // Can be used in place of a file so that an entire directory tree can be processed recursively
                 .arg(
                     Arg::with_name("directory")
-                    .help("Path for directory to rustle recursively")
+                    .help("Path for directory to rustle recursively. If set, replaces the input filename argument")
                     .required(false)
+                    .long("dir")
+                    .takes_value(true)
                 )
                 // Sets context lines opt
                 .arg(
                     Arg::with_name("context")
                     .help("Tells rustler how many files of surrounding context to return for special lines")
-                    .required(true)
+                    .required(false)
+                    .default_value("3")
+                    .long("ctx")
+                    .takes_value(true)
                 )
                 // Sets the wanted type of display returned
                 .arg(
@@ -46,6 +51,8 @@ impl CommandLineArgs {
                     .help("Selects what type of special lines get displayed [default: all]")
                     .required(false)
                     .possible_values(&["todo", "fixme", "note", "xxx", "all"])
+                    .long("type")
+                    .takes_value(true)
                 )
                 // Handles setting the output filename (if one given)
                 .arg(

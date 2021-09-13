@@ -1,28 +1,24 @@
-use super::{CommentType, Line};
+use super::{CommentType, Line, ParseData, ParsedDirectory, ParsedFile};
 use std::cmp;
 
 pub struct MarkedSection {
     pub lines: Vec<Line>,
     pub comment_type: CommentType,
+    pub title_xxx: String,
 }
 
 impl MarkedSection {
-    /// Reads the file line-by-line into a context-driven [`MarkedSection`](Self) struct
-    ///
-    /// # Arguments
-    ///
-    /// * `lines` - All of the non-empty lines from the file
-    ///
-    /// * `context` - The amount of context lines surrounding the special lines
-    ///
-    /// # Returns
-    ///
-    /// * `Vec<MarkedSection>` - All of the context-aware special lines
-    ///
-    /// # Notes
-    ///
-    /// If `context` passed in is > `lines.len()` then it will count context until EOF.
-    pub fn unpack_lines(lines: Vec<String>, context: usize) -> Vec<Self> {
+    fn unpack_lines_for_directory(dir_data: ParsedDirectory, context: usize) -> Vec<Self> {
+        dir_data
+            .files
+            .into_iter()
+            .map(|x| Self::unpack_lines_for_file(x, context).into_iter())
+            .flatten()
+            .collect()
+    }
+
+    fn unpack_lines_for_file(file_data: ParsedFile, context: usize) -> Vec<Self> {
+        let lines = file_data.lines;
         let mut marked_sections = Vec::new();
 
         let lines_len = lines.len();
@@ -52,11 +48,34 @@ impl MarkedSection {
 
                 marked_sections.push(Self {
                     lines: current_lines,
+                    title_xxx: file_data.filename.clone(),
                     comment_type,
                 });
             }
             i += 1;
         }
         marked_sections
+    }
+
+    /// Reads the file line-by-line into a context-driven [`MarkedSection`](Self) struct
+    ///
+    /// # Arguments
+    ///
+    /// * `parsed_data` - The file data for a single file or a directory
+    ///
+    /// * `context` - The amount of context lines surrounding the special lines
+    ///
+    /// # Returns
+    ///
+    /// * `Vec<MarkedSection>` - All of the context-aware special lines
+    ///
+    /// # Notes
+    ///
+    /// If `context` passed in is > `lines.len()` then it will count context until EOF.
+    pub fn unpack_lines(parsed_data: ParseData, context: usize) -> Vec<Self> {
+        match parsed_data {
+            ParseData::Directory(dir_data) => Self::unpack_lines_for_directory(dir_data, context),
+            ParseData::File(file_data) => Self::unpack_lines_for_file(file_data, context),
+        }
     }
 }
