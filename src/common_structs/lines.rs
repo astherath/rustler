@@ -6,10 +6,9 @@ pub struct Line {
 
 impl Line {
     pub fn new(raw_content: &str, number: usize, is_special: bool) -> Self {
-        let content = raw_content.trim().to_string();
         Self {
             number,
-            content,
+            content: raw_content.to_string(),
             is_special,
         }
     }

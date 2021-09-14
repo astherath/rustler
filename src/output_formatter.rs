@@ -19,7 +19,7 @@ fn get_output_str_for_block(block: OutputBlock, file_extension: Option<&str>) ->
 
     md_builder = header_for_output_block(md_builder, &block);
 
-    if block.context_lines.len() == 0 {
+    if block.all_lines.len() == 0 {
         return md_builder.to_markdown_string();
     }
 
@@ -81,13 +81,10 @@ fn context_block_inner_code(
         ))
         .unwrap()
         .increase_indentation_level()
-        .newline()
-        .insert_single_line(&block.special_line.tokenized_line.join(" "))
-        .unwrap()
         .newline();
 
     let lines_in_block = block
-        .context_lines
+        .all_lines
         .into_iter()
         .filter(|x| x.tokenized_line.len() > 1)
         .map(|x| x.tokenized_line.join(" "))

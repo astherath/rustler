@@ -58,7 +58,6 @@ fn get_unchecked_files_for_dir_rec(
     Ok(unchecked_files)
 }
 
-// one possible implementation of walking a directory only visiting files
 fn visit_dirs(dir: &Path, cb: &mut dyn FnMut(&DirEntry)) -> io::Result<()> {
     if dir.is_dir() {
         for entry in fs::read_dir(dir)? {

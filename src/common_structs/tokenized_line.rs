@@ -1,6 +1,9 @@
+use super::CommentType;
+
 pub struct TokenizedLine {
     pub line_number: usize,
     pub tokenized_line: Vec<String>,
+    pub is_special: bool,
 }
 
 impl TokenizedLine {
@@ -9,9 +12,11 @@ impl TokenizedLine {
             .split(" ")
             .map(|x| x.to_string())
             .collect::<Vec<String>>();
+
         Self {
             line_number,
             tokenized_line,
+            is_special: CommentType::check_line_special(&line),
         }
     }
 }
