@@ -25,7 +25,7 @@ impl CommentType {
     /// # Note
     ///
     /// If no match is found, will return [`CommentType::Other`](Self::Other).
-    pub fn get_display_type(type_opt: &String) -> Self {
+    pub fn get_display_type(type_opt: &str) -> Self {
         if type_opt == "todo" {
             Self::Todo
         } else if type_opt == "fixme" {
@@ -40,7 +40,7 @@ impl CommentType {
     }
 
     /// Returns the type of special line based on the string contents
-    pub fn get_special_line_type(line_str: &String) -> Self {
+    pub fn get_special_line_type(line_str: &str) -> Self {
         let lower_line = line_str.to_lowercase();
         if lower_line.contains("todo") {
             Self::Todo
@@ -55,8 +55,11 @@ impl CommentType {
         }
     }
 
-    pub fn check_line_special(line: &String) -> bool {
-        Self::get_special_line_type(line) != Self::Other
+    pub fn check_line_special(line: &str) -> bool {
+        let is_special = Self::get_special_line_type(line) != Self::Other;
+        let is_comment = is_comment(line);
+
+        is_special && is_comment
     }
 }
 
@@ -72,4 +75,9 @@ impl fmt::Display for CommentType {
         write!(f, "{}", comment_type)?;
         Ok(())
     }
+}
+
+fn is_comment(line: &str) -> bool {
+    const COMMENT_SYMBOLS: [&str; 5] = ["//", "/***", "#", r#"""""#, "/**"];
+    COMMENT_SYMBOLS.iter().map(|x| line.contains(x)).any(|x| x)
 }
